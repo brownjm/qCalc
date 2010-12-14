@@ -1,9 +1,12 @@
 """Basic mathematical classes and functions."""
 
 class MathType(object):
+    """Base type for all mathematical classes"""
     def __init__(self, val):
+        """Saves a string representation of the mathematical value"""
         self.val = val
     def __eq__(self, other):
+        """Equivalence includes comparison of type and value"""
         return (type(self)==type(other)) and (self.val == other.val)
 
 class Number(MathType):
@@ -11,6 +14,7 @@ class Number(MathType):
     def __init__(self, value):
         MathType.__init__(self, value)
     def __eq__(self, other):
+        """Equivalence includes type and floating point version of value"""
         return (type(self) == type(other)) and (float(self.val) == float(other.val))
     def Value(self):
         return float(self.val)
@@ -37,6 +41,7 @@ class Expression(object):
         self.right = right
 
     def __eq__(self, other):
+        """Equivalence includes comparison of children and operation"""
         return (self.left == other.left) and \
                (self.op == other.op) and \
                (self.right == other.right)
