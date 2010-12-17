@@ -50,7 +50,7 @@ class Expression(object):
 # and their associated classes
 inputDict = {r'[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?': Number,
              '[+*/\-]|\^': Operation,
-             '\(.+\)': Quantity}
+             '\((.+)\)': Quantity}
 
 # Dictionary containing QM classes and their associated strings tokens
 outputDict = {Number: 'val',
