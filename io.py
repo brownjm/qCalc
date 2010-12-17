@@ -12,13 +12,13 @@ class IOEngine(object):
         tree = buildTree(tokenList)
         return tree
 
-    def print(self, tree):
+    def printTree(self, tree):
         """Construct a string based on the expression tree"""
-        pass
+        return False
 
     def buildTree(self, tokenList):
         """Construct a tree based on the string token list"""
-        pass
+        return False
 
 
 class Classifier(object):
@@ -117,7 +117,7 @@ def split(self, string):
     tokens = [item[1] for item in tokenList] # add only string tokens, not loc
     return tokens
 
-def assemble(tokenList):
+def assemble(self, tokenList):
     """Assembles valid tokens into an output string."""
     outputString = ''.join(tokenList) # combine tokens into string
     outputString = outputString.replace('||', '|') # remove double pipes
