@@ -48,10 +48,12 @@ class Expression(object):
 
 # Dictionary containing regular expressions of quantum mechanical string tokens
 # and their associated classes
-inputDict = {r'^([+-]? *(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?)$': Number,
-             '^([+*/\-]|[\^])$': Operation}
+inputDict = {r'[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?': Number,
+             '[+*/\-]|\^': Operation,
+             '\(.+\)': Quantity}
 
 # Dictionary containing QM classes and their associated strings tokens
 outputDict = {Number: 'val',
-              Operation: 'val'}
+              Operation: 'val',
+              Quantity: '(val)'}
 
