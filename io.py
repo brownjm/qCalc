@@ -4,15 +4,28 @@ import re
 
 class IOEngine(object):
     """Main class to handle input and output"""
-    def __init__(self, inputDict, outputDict):
+    def __init__(self, inputDict, outputDict, orderOfOperationsList):
         self.io = IOstream(inputDict, outputDict)
         self.classify = Classifier(inputDict, outputDict)
+        self.builder = TreeBuilder(orderOfOperationsList)
 
     def parse(self, string):
-        """Parse string and build a tree of expressions"""
+        """Parse string and build an Expression tree"""
         tokenList = self.io.split(string)
-        tree = buildTree(tokenList)
+        objectList = []
+        for token in tokenList:
+            objectList.append(self.classify.toObject(token))
+        tree = self.builder.buildTree(objectList)
         return tree
+
+    def output(self, tree):
+        """Outputs string based on Expression tree"""
+        objectList = self.builder.collapseTree(tree)
+        tokenList = []
+        for Object in objectList:
+            tokenList.append(self.classify.toToken(Object))
+        string = self.io.assemble(tokenList)
+        return string
 
 
 class Classifier(object):
@@ -65,14 +78,14 @@ and their associated classes to instantiate.
                      regex1: class1,
                      regex2: class3}
 
-        outputDict is a dictionary containing classes and their associated string tokens
-        representation, where the keyword 'val' is replaced by the objects value or
-        name.
+        outputDict is a dictionary containing classes and their associated
+        string tokens representation, where the keyword 'val' is replaced by
+        the objects value or name.
 
         Example:
-            If an objects has a string representation of <<(some value)>> and it's name
-            is A, the string in the output dictionary should be written as <<val>>, so
-            that the object is printed as <<A>>.
+        If an objects has a string representation of <<(some value)>> and it's
+        name is A, the string in the output dictionary should be written as
+        <<val>>, so that the object is printed as <<A>>.
 
         outputDict = {class0: string0,
                       class1: string1,
@@ -124,12 +137,12 @@ operations list."""
     def __init__(self, orderOfOperationsList):
         self.order = orderOfOperationsList
 
-    def printTree(self, tree):
-        """Construct a string based on the expression tree"""
+    def collapseTree(self, tree):
+        """Construct an object list on the expression tree"""
         pass
 
-    def buildTree(self, tokenList):
-        """Construct a tree based on the string token list"""
+    def buildTree(self, objectList):
+        """Construct a tree based on the object list"""
         pass
 
 
