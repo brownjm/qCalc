@@ -5,7 +5,7 @@ import re
 class IOEngine(object):
     """Main class to handle input and output"""
     def __init__(self, inputDict, outputDict, orderOfOperationsList):
-        self.io = IOstream(inputDict, outputDict)
+        self.io = IOstream(inputDict, orderOfOperationsList)
         self.classify = Classifier(inputDict, outputDict)
         self.builder = TreeBuilder(orderOfOperationsList)
 
@@ -35,22 +35,35 @@ objects."""
         """inputDict is a dictionary containing regular expression strings
 and their associated classes to instantiate.
 
-inputDict = {regex0: class0,
-             regex1: class1,
-             regex2: class3}
-
-outputDict is a dictionary containing classes and their associated string tokens
+inputDict = {class0: regex0,
+             class1: regex1,
+             class2: regex2}
 
 outputDict = {class0: string0,
               class1: string1,
               class2: string2}
+
+outputDict is a dictionary containing classes and their associated
+string tokens representation, where the keyword 'val' is replaced by
+the objects value or name.
+
+Example:
+If an objects has a string representation of <<(some value)>> and it's
+name is A, the string in the output dictionary should be written as
+<<val>>, so that the object is printed as <<A>>.
 """
-        self.inputDict = inputDict
+        # inputDict for classifier must have regex keys that begin with ^ and
+        # end with $ to guarantee that that a valid token surrounded by extra
+        # characters raises a classification error
+        self.inputDict = {}
+        for Class, regex in inputDict.iteritems():
+            newRegex = '^' + regex + '$'
+            self.inputDict[Class] = newRegex
         self.outputDict = outputDict
 
     def toObject(self, stringToClassify):
         """Attempt to match string token to an object in the dictionary."""
-        for regex, Type in self.inputDict.iteritems():
+        for Type, regex in self.inputDict.iteritems():
             match =  re.search(regex, stringToClassify)
             if match is not None:
                 return Type(match.groups()[0]) # first element in tuple
@@ -70,7 +83,7 @@ replaces 'val' with actual class.val value."""
 
 class IOstream(object):
     """Class to split a string into smaller string tokens"""
-    def __init__(self, inputDict, outputDict):
+    def __init__(self, inputDict, orderOfOperationsList):
         """inputDict is a dictionary containing regular expression strings
 and their associated classes to instantiate.
 
@@ -78,21 +91,10 @@ and their associated classes to instantiate.
                      regex1: class1,
                      regex2: class3}
 
-        outputDict is a dictionary containing classes and their associated
-        string tokens representation, where the keyword 'val' is replaced by
-        the objects value or name.
-
-        Example:
-        If an objects has a string representation of <<(some value)>> and it's
-        name is A, the string in the output dictionary should be written as
-        <<val>>, so that the object is printed as <<A>>.
-
-        outputDict = {class0: string0,
-                      class1: string1,
-                      class2: string2}
+        orderOfOperationsList
         """
         self.inputDict = inputDict
-        self.outputDict = outputDict
+        self.order = orderOfOperationsList
 
     def split(self, string):
         """Split string into valid string tokens"""
@@ -106,7 +108,8 @@ and their associated classes to instantiate.
             string = string.replace(subStr, subStr.replace('|', '||'))
             
         tokenList = []
-        for regex in self.inputDict:
+        for Class in self.order:
+            regex = self.inputDict[Class]
             tokenMatches = re.finditer(regex, string) # find all matches in string
             for eachMatch in tokenMatches:
                 loc = eachMatch.span() # location of match: (begin, end)
@@ -159,3 +162,15 @@ class InputError(Exception):
         self.loc = loc
     def __str__(self):
         return repr(self.msg)
+
+if __name__ == '__main__':
+    from mathematics import *
+    test = '4+(4+(2+3))'
+    iostream = IOstream(inputDict, orderOfOperationsList)
+    tokenList = iostream.split(test)
+    classifier = Classifier(inputDict, outputDict)
+    objectList = []
+    for token in tokenList:
+        objectList.append(classifier.toObject(token))
+    print tokenList
+    print objectList
