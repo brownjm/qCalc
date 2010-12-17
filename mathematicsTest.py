@@ -4,7 +4,7 @@ import unittest
 import io
 from mathematics import *
 
-iostream = io.IOstream(inputDict, outputDict)
+iostream = io.IOstream(inputDict, orderOfOperationsList)
 classifier = io.Classifier(inputDict, outputDict)
 
 class KnownStrings(unittest.TestCase):
@@ -46,25 +46,26 @@ class KnownTokens(unittest.TestCase):
     """Contains test string tokens, correctly identified classes and their
 values"""
     knownTokens = (('1', Number, '1'),
-                   ('-3', Number, '-3'),
-                   ('-3.453234', Number, '-3.453234'),
+                   ('3.453234', Number, '3.453234'),
                    ('.1', Number, '.1'),
-                   ('-.7', Number, '-.7'),
                    ('3.1453e-10', Number, '3.1453e-10'),
-                   ('-14E200', Number, '-14E200'),
+                   ('14E200', Number, '14E200'),
 
                    ('+', Operation, '+'),
                    ('-', Operation, '-'),
                    ('*', Operation, '*'),
                    ('/', Operation, '/'),
-                   ('^', Operation, '^'))
+                   ('^', Operation, '^'),
+
+                   ('(2+3)', Quantity, '2+3'),
+                   ('(-2.3)', Quantity, '-2.3'),
+                   ('(4+(7-10))', Quantity, '4+(7-10)'))
 
     def testToObject(self):
         """ToObject should correctly instantiate string tokens into classes
 with correct values."""
         for token, Type, value in self.knownTokens:
             result = classifier.toObject(token)
-            print token
             self.assertEqual(Type, result.__class__)
 
     def testToToken(self):
@@ -76,8 +77,7 @@ class' value"""
 
 class BadTokens(unittest.TestCase):
     """Contains invalid Tokens"""
-    badTokens = ('-1-', '-.a', '3a', '20x320x93E-10', '&', '$', '@', '<<a|',
-                 '|a|', '<>', '1..')
+    badTokens = ('&', '$', '@', '<<a|')
 
     def testBadTokens(self):
         """bad tokens should raise ClassificationError"""
