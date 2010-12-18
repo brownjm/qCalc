@@ -4,8 +4,9 @@ import re
 
 class IOEngine(object):
     """Main class to handle input and output"""
-    def __init__(self, inputDict, outputDict, orderOfOperationsList):
-        self.io = IOstream(inputDict, orderOfOperationsList)
+    def __init__(self, inputDict, outputDict, parseOrder,
+                 orderOfOperations):
+        self.io = IOstream(inputDict, parseOrder)
         self.classify = Classifier(inputDict, outputDict)
         self.builder = TreeBuilder(orderOfOperationsList)
 
@@ -83,7 +84,7 @@ replaces 'val' with actual class.val value."""
 
 class IOstream(object):
     """Class to split a string into smaller string tokens"""
-    def __init__(self, inputDict, orderOfOperationsList):
+    def __init__(self, inputDict, parseOrder):
         """inputDict is a dictionary containing regular expression strings
 and their associated classes to instantiate.
 
@@ -91,10 +92,11 @@ and their associated classes to instantiate.
                      regex1: class1,
                      regex2: class3}
 
-        orderOfOperationsList
+        parseOrder is a list of classes in the order they should be removed
+        from the input string
         """
         self.inputDict = inputDict
-        self.order = orderOfOperationsList
+        self.order = parseOrder
 
     def split(self, string):
         """Split string into valid string tokens"""
@@ -139,10 +141,19 @@ class TreeBuilder(object):
 operations list."""
     def __init__(self, orderOfOperationsList):
         self.order = orderOfOperationsList
-
+        
     def collapseTree(self, tree):
         """Construct an object list on the expression tree"""
-        pass
+        objectList = [tree]
+        typeList = [type(tree)]
+        while Expression in typeList:
+            loc = typeList.index(Expression)
+            exp = objectList.pop(loc)
+            objectList.insert(loc, exp.right)
+            objectList.insert(loc, exp.op)
+            objectList.insert(loc, exp.left)
+            typeList = [type(item) for item in objectList] # update typeList
+        return objectList
 
     def buildTree(self, objectList):
         """Construct a tree based on the object list"""
@@ -152,11 +163,10 @@ operations list."""
                 left = objectList.pop(loc)
                 op = objectList.pop(loc)
                 right = objectList.pop(loc)
-                objectList.insert(loc, Express(left, op, right))
+                objectList.insert(loc, Expression(left, op, right))
         tree = objectList[0]
         return tree
-                
-                
+
 
 class Expression(object):
     """Class to be used as a node when creating trees of Expressions"""
@@ -165,11 +175,21 @@ class Expression(object):
         self.op = operation
         self.right = right
 
-    def __eq__(self, other):
-        """Equivalence includes comparison of children and operation"""
-        return (self.left == other.left) and \
-               (self.op == other.op) and \
-               (self.right == other.right)
+
+def printTree(tree, level=0):
+    """Function to print expression tree"""
+    if not isinstance(tree, Expression):
+        print ' ' * level + str(tree)
+        return
+    printTree(tree.right, level+1)
+    print ' ' * level + str(tree.op)
+    printTree(tree.left, level+1)
+
+def depth(tree, level=0):
+    if not isinstance(tree, Expression):
+        return level
+    else:
+        return max(depth(tree.right, level+1), depth(tree.left, level+1))
 
 
 # Define exceptions
@@ -188,8 +208,8 @@ class InputError(Exception):
 
 if __name__ == '__main__':
     from mathematics import *
-    test = '1+2*3'
-    iostream = IOstream(inputDict, orderOfOperationsList)
+    test = '1+2*(3+4)'
+    iostream = IOstream(inputDict, parseOrder)
     tokenList = iostream.split(test)
     classifier = Classifier(inputDict, outputDict)
     objectList = []
@@ -198,4 +218,7 @@ if __name__ == '__main__':
     print tokenList
     print objectList
 
-    ls = objectList
+    t = TreeBuilder(orderOfOperations)
+    tree = t.buildTree(objectList)
+    printTree(tree)
+    print t.collapseTree(tree)

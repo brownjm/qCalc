@@ -8,6 +8,8 @@ class MathType(object):
     def __eq__(self, other):
         """Equivalence includes comparison of type and value"""
         return (type(self)==type(other)) and (self.val == other.val)
+    def __repr__(self):
+        return self.val
 
 
 class Number(MathType):
@@ -44,8 +46,9 @@ inputDict = {Number: r'([0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?)',
              Operation: '([+*/\-]|\^)',
              Quantity: '\((.+)\)'}
 
-orderOfOperationsList = [Operation('*'), Operation('/'), Operation('+'),
-                         Operation('-')]
+parseOrder = [Quantity, Number, Operation]
+orderOfOperations = [Operation('*'), Operation('/'), Operation('+'),
+                     Operation('-')]
 
 # Dictionary containing QM classes and their associated strings tokens
 outputDict = {Number: 'val',
