@@ -34,8 +34,12 @@ class IOEngine(object):
             while operation in objectList:
                 loc = objectList.index(operation) - 1
                 left = objectList.pop(loc)
+                if isinstance(left, Quantity):
+                    left = self.parse(left.val)
                 op = objectList.pop(loc)
                 right = objectList.pop(loc)
+                if isinstance(right, Quantity):
+                    right = self.parse(right.val)
                 objectList.insert(loc, Expression(left, op, right))
         tree = objectList[0]
         return tree
@@ -202,7 +206,7 @@ class InputError(Exception):
 if __name__ == '__main__':
     from mathematics import *
 
-    test = r'1+2*(3+4)/1'
+    test = '2*(3+4)/10+2'
     print test
     io = IOEngine(inputDict, outputDict, parseOrder, orderOfOperations)
     tree = io.parse(test)
