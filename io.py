@@ -149,6 +149,20 @@ operations list."""
         pass
     
 
+class Expression(object):
+    """Class to be used as a node when creating trees of Expressions"""
+    def __init__(self, left, operation=None, right=None):
+        self.left = left
+        self.op = operation
+        self.right = right
+
+    def __eq__(self, other):
+        """Equivalence includes comparison of children and operation"""
+        return (self.left == other.left) and \
+               (self.op == other.op) and \
+               (self.right == other.right)
+
+
 # Define exceptions
 class ClassificationError(Exception):
     def __init__(self, string):
