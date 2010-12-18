@@ -8,7 +8,7 @@ class IOEngine(object):
                  orderOfOperations):
         self.io = IOstream(inputDict, parseOrder)
         self.classify = Classifier(inputDict, outputDict)
-        self.builder = TreeBuilder(orderOfOperationsList)
+        self.order = orderOfOperations
 
     def parse(self, string):
         """Parse string and build an Expression tree"""
@@ -16,7 +16,7 @@ class IOEngine(object):
         objectList = []
         for token in tokenList:
             objectList.append(self.classify.toObject(token))
-        tree = self.builder.buildTree(objectList)
+        tree = self.buildTree(objectList)
         return tree
 
     def output(self, tree):
@@ -27,6 +27,35 @@ class IOEngine(object):
             tokenList.append(self.classify.toToken(Object))
         string = self.io.assemble(tokenList)
         return string
+
+    def buildTree(self, objectList):
+        """Construct a tree based on the object list"""
+        for operation in self.order:
+            while operation in objectList:
+                loc = objectList.index(operation) - 1
+                left = objectList.pop(loc)
+                if isinstance(left, Quantity):
+                    left = self.parse(left.val)
+                op = objectList.pop(loc)
+                right = objectList.pop(loc)
+                if isinstance(right, Quantity):
+                    right = self.parse(right.val)
+                objectList.insert(loc, Expression(left, op, right))
+        tree = objectList[0]
+        return tree
+
+    def collapseTree(self, tree):
+        """Construct an object list on the expression tree"""
+        objectList = [tree]
+        typeList = [type(tree)]
+        while Expression in typeList:
+            loc = typeList.index(Expression)
+            exp = objectList.pop(loc)
+            objectList.insert(loc, exp.right)
+            objectList.insert(loc, exp.op)
+            objectList.insert(loc, exp.left)
+            typeList = [type(item) for item in objectList] # update typeList
+        return objectList
 
 
 class Classifier(object):
@@ -136,38 +165,6 @@ and their associated classes to instantiate.
         return outputString
 
 
-class TreeBuilder(object):
-    """Builds Expression trees from an object list based on an order of
-operations list."""
-    def __init__(self, orderOfOperationsList):
-        self.order = orderOfOperationsList
-        
-    def collapseTree(self, tree):
-        """Construct an object list on the expression tree"""
-        objectList = [tree]
-        typeList = [type(tree)]
-        while Expression in typeList:
-            loc = typeList.index(Expression)
-            exp = objectList.pop(loc)
-            objectList.insert(loc, exp.right)
-            objectList.insert(loc, exp.op)
-            objectList.insert(loc, exp.left)
-            typeList = [type(item) for item in objectList] # update typeList
-        return objectList
-
-    def buildTree(self, objectList):
-        """Construct a tree based on the object list"""
-        for operation in self.order:
-            while operation in objectList:
-                loc = objectList.index(operation) - 1
-                left = objectList.pop(loc)
-                op = objectList.pop(loc)
-                right = objectList.pop(loc)
-                objectList.insert(loc, Expression(left, op, right))
-        tree = objectList[0]
-        return tree
-
-
 class Expression(object):
     """Class to be used as a node when creating trees of Expressions"""
     def __init__(self, left, operation=None, right=None):
@@ -208,17 +205,9 @@ class InputError(Exception):
 
 if __name__ == '__main__':
     from mathematics import *
-    test = '1+2*(3+4)'
-    iostream = IOstream(inputDict, parseOrder)
-    tokenList = iostream.split(test)
-    classifier = Classifier(inputDict, outputDict)
-    objectList = []
-    for token in tokenList:
-        objectList.append(classifier.toObject(token))
-    print tokenList
-    print objectList
 
-    t = TreeBuilder(orderOfOperations)
-    tree = t.buildTree(objectList)
+    test = '2*(3+4)/10+2'
+    print test
+    io = IOEngine(inputDict, outputDict, parseOrder, orderOfOperations)
+    tree = io.parse(test)
     printTree(tree)
-    print t.collapseTree(tree)
