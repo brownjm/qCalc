@@ -144,7 +144,16 @@ operations list."""
         
     def collapseTree(self, tree):
         """Construct an object list on the expression tree"""
-        pass
+        objectList = [tree]
+        typeList = [type(tree)]
+        while Expression in typeList:
+            loc = typeList.index(Expression)
+            exp = objectList.pop(loc)
+            objectList.insert(loc, exp.right)
+            objectList.insert(loc, exp.op)
+            objectList.insert(loc, exp.left)
+            typeList = [type(item) for item in objectList] # update typeList
+        return objectList
 
     def buildTree(self, objectList):
         """Construct a tree based on the object list"""
@@ -157,8 +166,7 @@ operations list."""
                 objectList.insert(loc, Expression(left, op, right))
         tree = objectList[0]
         return tree
-                
-                
+
 
 class Expression(object):
     """Class to be used as a node when creating trees of Expressions"""
@@ -166,9 +174,6 @@ class Expression(object):
         self.left = left
         self.op = operation
         self.right = right
-
-    def __repr__(self):
-        return str(self.op)
 
 
 def printTree(tree, level=0):
@@ -216,3 +221,4 @@ if __name__ == '__main__':
     t = TreeBuilder(orderOfOperations)
     tree = t.buildTree(objectList)
     printTree(tree)
+    print t.collapseTree(tree)
