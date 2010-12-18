@@ -146,8 +146,17 @@ operations list."""
 
     def buildTree(self, objectList):
         """Construct a tree based on the object list"""
-        pass
-    
+        for operation in self.order:
+            while operation in objectList:
+                loc = objectList.index(operation) - 1
+                left = objectList.pop(loc)
+                op = objectList.pop(loc)
+                right = objectList.pop(loc)
+                objectList.insert(loc, Express(left, op, right))
+        tree = objectList[0]
+        return tree
+                
+                
 
 class Expression(object):
     """Class to be used as a node when creating trees of Expressions"""
@@ -179,7 +188,7 @@ class InputError(Exception):
 
 if __name__ == '__main__':
     from mathematics import *
-    test = '4+(4+(2+3))'
+    test = '1+2*3'
     iostream = IOstream(inputDict, orderOfOperationsList)
     tokenList = iostream.split(test)
     classifier = Classifier(inputDict, outputDict)
@@ -188,3 +197,5 @@ if __name__ == '__main__':
         objectList.append(classifier.toObject(token))
     print tokenList
     print objectList
+
+    ls = objectList
