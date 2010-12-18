@@ -44,7 +44,8 @@ inputDict = {Number: r'([0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?)',
              Operation: '([+*/\-]|\^)',
              Quantity: '\((.+)\)'}
 
-orderOfOperationsList = [Quantity, Number, Operation]
+orderOfOperationsList = [Operation('*'), Operation('/'), Operation('+'),
+                         Operation('-')]
 
 # Dictionary containing QM classes and their associated strings tokens
 outputDict = {Number: 'val',
