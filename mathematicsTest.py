@@ -4,7 +4,7 @@ import unittest
 import io
 from mathematics import *
 
-iostream = io.IOstream(inputDict, orderOfOperationsList)
+iostream = io.IOstream(inputDict, parseOrder)
 classifier = io.Classifier(inputDict, outputDict)
 
 class KnownStrings(unittest.TestCase):
@@ -35,7 +35,7 @@ class KnownStrings(unittest.TestCase):
 
 class BadStrings(unittest.TestCase):
     """Contains invalid string input"""
-    badStrings = ('&', '$', '@', '<<a|', '<>', '1..')
+    badStrings = ('1.2&', '$+3', '3^@', '1.3e-3<<a|', '<>', '1..')
 
     def testSplit(self):
         """Bad strings should raise InputError"""
@@ -77,10 +77,10 @@ class' value"""
 
 class BadTokens(unittest.TestCase):
     """Contains invalid Tokens"""
-    badTokens = ('&', '$', '@', '<<a|')
+    badTokens = ('&', '$', '@')
 
     def testBadTokens(self):
-        """bad tokens should raise ClassificationError"""
+        """Bad tokens should raise ClassificationError"""
         for token in self.badTokens:
             self.assertRaises(io.ClassificationError, classifier.toObject,
                               token)
