@@ -44,7 +44,7 @@ class Variable(MathType):
 # and their associated classes
 inputDict = {Number: r'([0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?)',
              Operation: '([+*/\-]|\^)',
-             Quantity: '\((.+)\)'}
+             Quantity: '[(](.+)[)]'}
 
 parseOrder = [Quantity, Number, Operation]
 orderOfOperations = [Operation('*'), Operation('/'), Operation('+'),
