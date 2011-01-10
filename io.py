@@ -203,6 +203,13 @@ class InputError(Exception):
     def __str__(self):
         return repr(self.msg)
 
+class ContainerError(Exception):
+    def __init__(self, string, loc=0):
+        self.msg = "Missing matching container symbol: {0}".format(string)
+        self.loc = loc
+    def __str__(self):
+        return self.msg
+
 if __name__ == '__main__':
     from mathematics import *
 
