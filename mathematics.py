@@ -12,6 +12,12 @@ class MathType(object):
         return self.val
 
 
+class ContainerType(object):
+    def __init__(self, openingChar, closingChar):
+        self.openingChar = openingChar
+        self.closingChar = closingChar
+
+
 class Number(MathType):
     """Wrapper class for numerical values"""
     def __init__(self, value):
