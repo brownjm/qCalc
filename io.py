@@ -6,27 +6,73 @@ class IOEngine(object):
     """Main class to handle input and output"""
     def __init__(self, inputDict, outputDict, parseOrder,
                  orderOfOperations):
-        self.io = IOstream(inputDict, parseOrder)
-        self.classify = Classifier(inputDict, outputDict)
+        """inputDict is a dictionary containing regular expression strings
+and their associated classes to instantiate.
+
+inputDict = {class0: regex0,
+             class1: regex1,
+             class2: regex2}
+
+outputDict is a dictionary containing classes and their associated
+string tokens representation, where the keyword 'val' is replaced by
+the objects value or name.
+
+Example of outputDict:
+If an objects has a string representation of <<(some value)>> and it's
+name is A, the string in the output dictionary should be written as
+<<val>>, so that the object is printed as <<A>>.
+
+outputDict = {class0: string0,
+              class1: string1,
+              class2: string2}
+
+parseOrder is a list of classes in the order they should be removed from the
+input string
+
+orderOfOperations is a list of the correct mathematical order of operations
+"""
+        self.inputDict = inputDict
+        self.outputDict = outputDict
+        self.parseOrder = parseOrder
         self.order = orderOfOperations
 
     def parse(self, string):
         """Parse string and build an Expression tree"""
-        tokenList = self.io.split(string)
+        tokenList = self.split(string)
         objectList = []
         for token in tokenList:
-            objectList.append(self.classify.toObject(token))
+            objectList.append(self.toObject(token))
         tree = self.buildTree(objectList)
         return tree
 
     def output(self, tree):
         """Outputs string based on Expression tree"""
-        objectList = self.builder.collapseTree(tree)
+        objectList = self.collapseTree(tree)
         tokenList = []
         for Object in objectList:
-            tokenList.append(self.classify.toToken(Object))
-        string = self.io.assemble(tokenList)
+            tokenList.append(self.toToken(Object))
+        string = self.assemble(tokenList)
         return string
+
+    def toObject(self, tokenToClassify):
+        """Attempt to match string token to an object in the dictionary."""
+        for Type, regex in self.inputDict.iteritems():
+            # ^regex$ guarantees no surrounding characters in tokenToClassify
+            match =  re.search('^'+regex+'$', tokenToClassify)
+            if match is not None:
+                return Type(match.groups()[0]) # first element in tuple
+            else:
+                pass
+        raise ClassificationError(tokenToClassify) # no match in dictionary
+
+    def toToken(self, classToTokenize):
+        """Attempt to create string token from classes in dictionary. Also
+replaces 'val' with actual class.val value."""
+        try:
+            token = self.outputDict[classToTokenize.__class__] # lookup class
+            return token.replace('val', classToTokenize.val)
+        except KeyError:
+            raise ClassificationError(classToTokenize)
 
     def buildTree(self, objectList):
         """Construct a tree based on the object list"""
@@ -57,7 +103,7 @@ class IOEngine(object):
             typeList = [type(item) for item in objectList] # update typeList
         return objectList
 
-    def parseContainer(string, container):
+    def findContainer(self, string, container):
         """Search given string for specified container and return a list of
 occurances and their associated nested depth."""
         stack = []
@@ -70,97 +116,31 @@ occurances and their associated nested depth."""
                     openingCharLoc = stack.pop()
                     closingCharLoc = loc
                     depth = len(stack)
+                    span = (openingCharLoc, closingCharLoc+1)
                     containedString = string[openingCharLoc+1:closingCharLoc]
-                    nestList.append((depth, containedString))
+                    nestList.append((depth, span, containedString))
                 else: # no opening character to match closing character
                     raise ContainerError(string, loc)
         if len(stack) != 0:
             raise ContainerError(string, stack.pop())
         return nestList
 
-
-class Classifier(object):
-    """Class that handles matching string tokens and their appropriate
-objects."""
-    def __init__(self, inputDict, outputDict):
-        """inputDict is a dictionary containing regular expression strings
-and their associated classes to instantiate.
-
-inputDict = {class0: regex0,
-             class1: regex1,
-             class2: regex2}
-
-outputDict = {class0: string0,
-              class1: string1,
-              class2: string2}
-
-outputDict is a dictionary containing classes and their associated
-string tokens representation, where the keyword 'val' is replaced by
-the objects value or name.
-
-Example:
-If an objects has a string representation of <<(some value)>> and it's
-name is A, the string in the output dictionary should be written as
-<<val>>, so that the object is printed as <<A>>.
-"""
-        # inputDict for classifier must have regex keys that begin with ^ and
-        # end with $ to guarantee that that a valid token surrounded by extra
-        # characters raises a classification error
-        self.inputDict = {}
-        for Class, regex in inputDict.iteritems():
-            newRegex = '^' + regex + '$'
-            self.inputDict[Class] = newRegex
-        self.outputDict = outputDict
-
-    def toObject(self, stringToClassify):
-        """Attempt to match string token to an object in the dictionary."""
-        for Type, regex in self.inputDict.iteritems():
-            match =  re.search(regex, stringToClassify)
-            if match is not None:
-                return Type(match.groups()[0]) # first element in tuple
-            else:
-                pass
-        raise ClassificationError(stringToClassify) # no match in dictionary
-
-    def toToken(self, classToTokenize):
-        """Attempt to create string token from classes in dictionary. Also
-replaces 'val' with actual class.val value."""
-        try:
-            token = self.outputDict[classToTokenize.__class__] # lookup class
-            return token.replace('val', classToTokenize.val)
-        except KeyError:
-            raise ClassificationError(classToTokenize)
-
-
-class IOstream(object):
-    """Class to split a string into smaller string tokens"""
-    def __init__(self, inputDict, parseOrder):
-        """inputDict is a dictionary containing regular expression strings
-and their associated classes to instantiate.
-
-        inputDict = {regex0: class0,
-                     regex1: class1,
-                     regex2: class3}
-
-        parseOrder is a list of classes in the order they should be removed
-        from the input string
-        """
-        self.inputDict = inputDict
-        self.order = parseOrder
-
     def split(self, string):
         """Split string into valid string tokens"""
+        #######################################################################
         # Pipe Cleaner - fix problems arising from pipes in inner products
         # This is only a problem with qm.py, need to move this to a preprocess
-        # method
+        # function
+        #######################################################################
         innerProdMatches = re.finditer(r'<[a-zA-Z][a-zA-Z0-9]*[|][a-zA-Z][a-zA-Z0-9]*>', string)
         for InnerProd in innerProdMatches:
             subStr = InnerProd.group(0)
             # double the pipe within the inner product
             string = string.replace(subStr, subStr.replace('|', '||'))
-            
+        #######################################################################
+        
         tokenList = []
-        for Class in self.order:
+        for Class in self.parseOrder:
             regex = self.inputDict[Class]
             tokenMatches = re.finditer(regex, string) # find all matches in string
             for eachMatch in tokenMatches:
@@ -182,7 +162,12 @@ and their associated classes to instantiate.
     def assemble(self, tokenList):
         """Assembles valid tokens into an output string."""
         outputString = ''.join(tokenList) # combine tokens into string
-        outputString = outputString.replace('||', '|') # remove double pipes
+        #######################################################################
+        # Removes double pipes - problem with inner products in qm.py
+        # Need to move this to a post process function
+        #######################################################################
+        outputString = outputString.replace('||', '|')
+        #######################################################################
         return outputString
 
 
@@ -194,6 +179,7 @@ class Expression(object):
         self.right = right
 
 
+# Helper functions
 def printTree(tree, level=0):
     """Function to print expression tree"""
     if not isinstance(tree, Expression):
@@ -204,6 +190,7 @@ def printTree(tree, level=0):
     printTree(tree.left, level+1)
 
 def depth(tree, level=0):
+    """Calculate the depth of a tree"""
     if not isinstance(tree, Expression):
         return level
     else:
