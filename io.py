@@ -57,7 +57,7 @@ class IOEngine(object):
             typeList = [type(item) for item in objectList] # update typeList
         return objectList
 
-    def parseContainer(string, container):
+    def findContainer(self, string, container):
         """Search given string for specified container and return a list of
 occurances and their associated nested depth."""
         stack = []
@@ -70,8 +70,9 @@ occurances and their associated nested depth."""
                     openingCharLoc = stack.pop()
                     closingCharLoc = loc
                     depth = len(stack)
+                    span = (openingCharLoc, closingCharLoc+1)
                     containedString = string[openingCharLoc+1:closingCharLoc]
-                    nestList.append((depth, containedString))
+                    nestList.append((depth, span, containedString))
                 else: # no opening character to match closing character
                     raise ContainerError(string, loc)
         if len(stack) != 0:
