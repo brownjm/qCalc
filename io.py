@@ -57,6 +57,27 @@ class IOEngine(object):
             typeList = [type(item) for item in objectList] # update typeList
         return objectList
 
+    def parseContainer(string, container):
+        """Search given string for specified container and return a list of
+occurances and their associated nested depth."""
+        stack = []
+        nestList = []
+        for loc, char in enumerate(string):
+            if char == container.openingChar:
+                stack.append(loc) # save location of character
+            elif char == container.closingChar:
+                if stack: # check if not empty, opening character was found
+                    openingCharLoc = stack.pop()
+                    closingCharLoc = loc
+                    depth = len(stack)
+                    containedString = string[openingCharLoc+1:closingCharLoc]
+                    nestList.append((depth, containedString))
+                else: # no opening character to match closing character
+                    raise ContainerError(string, loc)
+        if len(stack) != 0:
+            raise ContainerError(string, stack.pop())
+        return nestList
+
 
 class Classifier(object):
     """Class that handles matching string tokens and their appropriate
@@ -202,6 +223,13 @@ class InputError(Exception):
         self.loc = loc
     def __str__(self):
         return repr(self.msg)
+
+class ContainerError(Exception):
+    def __init__(self, string, loc=0):
+        self.msg = "Missing matching container symbol: {0}".format(string)
+        self.loc = loc
+    def __str__(self):
+        return self.msg
 
 if __name__ == '__main__':
     from mathematics import *
