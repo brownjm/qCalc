@@ -1,11 +1,12 @@
 """Classes and functions to handle input and output streams"""
 
 import re
+import mathematics
 
 class IOEngine(object):
     """Main class to handle input and output"""
     def __init__(self, inputDict, outputDict, parseOrder,
-                 orderOfOperations):
+                 orderOfOperations, containers):
         """inputDict is a dictionary containing regular expression strings
 and their associated classes to instantiate.
 
@@ -35,7 +36,17 @@ orderOfOperations is a list of the correct mathematical order of operations
         self.outputDict = outputDict
         self.parseOrder = parseOrder
         self.order = orderOfOperations
+        self.containers = containers
 
+    def input(self, string):
+        """IOEngine main input method. Contructs a tree from a string"""
+        objectList = []
+        # find containers and parse into trees
+        for container in containers:
+            self.findContainer(string, container)
+        
+        tree = self.buildTree(objectList)
+        
     def parse(self, string):
         """Parse string and build an Expression tree"""
         tokenList = self.split(string)
@@ -46,7 +57,8 @@ orderOfOperations is a list of the correct mathematical order of operations
         return tree
 
     def output(self, tree):
-        """Outputs string based on Expression tree"""
+        """IOEngine main output method. Outputs string based on Expression tree
+"""
         objectList = self.collapseTree(tree)
         tokenList = []
         for Object in objectList:
@@ -219,6 +231,6 @@ if __name__ == '__main__':
     p = ContainerType('(', ')')
     test = '1+(2+(3+4))'
     print test
-    io = IOEngine(inputDict, outputDict, parseOrder, orderOfOperations)
-    tree = io.parse(test)
-    printTree(tree)
+    io = IOEngine(inputDict, outputDict, parseOrder, orderOfOperations,
+                  containers)
+    con = io.findContainer(test, p)
