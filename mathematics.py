@@ -52,7 +52,8 @@ inputDict = {Number: r'([0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?)',
              Operation: '([+*/\-]|\^)',
              Quantity: '[(](.+)[)]'}
 
-parseOrder = [Quantity, Number, Operation]
+containers = [ContainerType('(', ')')]
+parseOrder = [Number, Operation]
 orderOfOperations = [Operation('*'), Operation('/'), Operation('+'),
                      Operation('-')]
 

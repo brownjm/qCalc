@@ -1,11 +1,12 @@
 """Classes and functions to handle input and output streams"""
 
 import re
+import mathematics
 
 class IOEngine(object):
     """Main class to handle input and output"""
     def __init__(self, inputDict, outputDict, parseOrder,
-                 orderOfOperations):
+                 orderOfOperations, containers):
         """inputDict is a dictionary containing regular expression strings
 and their associated classes to instantiate.
 
@@ -35,7 +36,17 @@ orderOfOperations is a list of the correct mathematical order of operations
         self.outputDict = outputDict
         self.parseOrder = parseOrder
         self.order = orderOfOperations
+        self.containers = containers
 
+    def input(self, string):
+        """IOEngine main input method. Contructs a tree from a string"""
+        objectList = []
+        # find containers and parse into trees
+        for container in containers:
+            self.findContainer(string, container)
+        
+        tree = self.buildTree(objectList)
+        
     def parse(self, string):
         """Parse string and build an Expression tree"""
         tokenList = self.split(string)
@@ -46,7 +57,8 @@ orderOfOperations is a list of the correct mathematical order of operations
         return tree
 
     def output(self, tree):
-        """Outputs string based on Expression tree"""
+        """IOEngine main output method. Outputs string based on Expression tree
+"""
         objectList = self.collapseTree(tree)
         tokenList = []
         for Object in objectList:
@@ -80,12 +92,8 @@ replaces 'val' with actual class.val value."""
             while operation in objectList:
                 loc = objectList.index(operation) - 1
                 left = objectList.pop(loc)
-                if isinstance(left, Quantity):
-                    left = self.parse(left.val)
                 op = objectList.pop(loc)
                 right = objectList.pop(loc)
-                if isinstance(right, Quantity):
-                    right = self.parse(right.val)
                 objectList.insert(loc, Expression(left, op, right))
         tree = objectList[0]
         return tree
@@ -107,7 +115,7 @@ replaces 'val' with actual class.val value."""
         """Search given string for specified container and return a list of
 occurances and their associated nested depth."""
         stack = []
-        nestList = []
+        containerMatches = []
         for loc, char in enumerate(string):
             if char == container.openingChar:
                 stack.append(loc) # save location of character
@@ -118,12 +126,13 @@ occurances and their associated nested depth."""
                     depth = len(stack)
                     span = (openingCharLoc, closingCharLoc+1)
                     containedString = string[openingCharLoc+1:closingCharLoc]
-                    nestList.append((depth, span, containedString))
+                    containerMatches.append(ContainerMatch(depth, span,
+                                                           containedString))
                 else: # no opening character to match closing character
                     raise ContainerError(string, loc)
         if len(stack) != 0:
             raise ContainerError(string, stack.pop())
-        return nestList
+        return containerMatches
 
     def split(self, string):
         """Split string into valid string tokens"""
@@ -170,13 +179,20 @@ occurances and their associated nested depth."""
         #######################################################################
         return outputString
 
-
+# Helper classes
 class Expression(object):
     """Class to be used as a node when creating trees of Expressions"""
     def __init__(self, left, operation=None, right=None):
         self.left = left
         self.op = operation
         self.right = right
+
+class ContainerMatch(object):
+    """Class that will represent matched results from findContainer method."""
+    def __init__(self, depth, span, string):
+        self.depth = depth
+        self.span = span
+        self.string = string
 
 
 # Helper functions
@@ -220,9 +236,9 @@ class ContainerError(Exception):
 
 if __name__ == '__main__':
     from mathematics import *
-
-    test = '2*(3+4)/10+2'
+    p = ContainerType('(', ')')
+    test = '1+(2+(3+4))'
     print test
-    io = IOEngine(inputDict, outputDict, parseOrder, orderOfOperations)
-    tree = io.parse(test)
-    printTree(tree)
+    io = IOEngine(inputDict, outputDict, parseOrder, orderOfOperations,
+                  containers)
+    con = io.findContainer(test, p)
