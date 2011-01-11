@@ -115,7 +115,7 @@ replaces 'val' with actual class.val value."""
         """Search given string for specified container and return a list of
 occurances and their associated nested depth."""
         stack = []
-        nestList = []
+        containerMatches = []
         for loc, char in enumerate(string):
             if char == container.openingChar:
                 stack.append(loc) # save location of character
@@ -126,12 +126,13 @@ occurances and their associated nested depth."""
                     depth = len(stack)
                     span = (openingCharLoc, closingCharLoc+1)
                     containedString = string[openingCharLoc+1:closingCharLoc]
-                    nestList.append((depth, span, containedString))
+                    containerMatches.append(ContainerMatch(depth, span,
+                                                           containedString))
                 else: # no opening character to match closing character
                     raise ContainerError(string, loc)
         if len(stack) != 0:
             raise ContainerError(string, stack.pop())
-        return nestList
+        return containerMatches
 
     def split(self, string):
         """Split string into valid string tokens"""
@@ -178,13 +179,20 @@ occurances and their associated nested depth."""
         #######################################################################
         return outputString
 
-
+# Helper classes
 class Expression(object):
     """Class to be used as a node when creating trees of Expressions"""
     def __init__(self, left, operation=None, right=None):
         self.left = left
         self.op = operation
         self.right = right
+
+class ContainerMatch(object):
+    """Class that will represent matched results from findContainer method."""
+    def __init__(self, depth, span, string):
+        self.depth = depth
+        self.span = span
+        self.string = string
 
 
 # Helper functions
