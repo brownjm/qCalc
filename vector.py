@@ -1,0 +1,1 @@
+"""Plugin for vector algebra"""
