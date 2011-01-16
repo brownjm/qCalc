@@ -4,8 +4,8 @@ import unittest
 import io
 from mathematics import *
 
-iostream = io.IOstream(inputDict, parseOrder)
-classifier = io.Classifier(inputDict, outputDict)
+iostream = io.IOEngine(inputDict, outputDict, parseOrder,
+                       orderOfOperations, containers)
 
 class KnownStrings(unittest.TestCase):
     """Contains test strings and a list of correctly separated string tokens."""
@@ -69,14 +69,14 @@ values"""
         """ToObject should correctly instantiate string tokens into classes
 with correct values."""
         for token, Type, value in self.knownTokens:
-            result = classifier.toObject(token)
+            result = iostream.toObject(token)
             self.assertEqual(Type, result.__class__)
 
     def testToToken(self):
         """ToToken should correctly produce a string token containing the
 class' value"""
         for token, Type, value in self.knownTokens:
-            result = classifier.toToken(Type(value))
+            result = iostream.toToken(Type(value))
             self.assertEqual(token, result)
 
 class BadTokens(unittest.TestCase):
@@ -86,7 +86,7 @@ class BadTokens(unittest.TestCase):
     def testBadTokens(self):
         """Bad tokens should raise ClassificationError"""
         for token in self.badTokens:
-            self.assertRaises(io.ClassificationError, classifier.toObject,
+            self.assertRaises(io.ClassificationError, iostream.toObject, 
                               token)
 
 
