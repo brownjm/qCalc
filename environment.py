@@ -11,7 +11,7 @@ items such as variables, current objects in environment, command history, etc.
 """
     def __init__(self):
         self.IOEngine = IOEngine(m.inputDict, m.outputDict, m.parseOrder,
-                                 m.orderOfOperations) #Reference to IO Engine
+                                 m.orderOfOperations, None) #Reference to IO Engine
         self.CalcEngine  = CalcEngine()  #Reference to Calc Engine
         self.history = []   #History of the user's actions
         self.variables = {} #Variables the user can create
@@ -41,7 +41,6 @@ items such as variables, current objects in environment, command history, etc.
         redTree = self.CalcEngine.Evaluate(exprTree)
         finalStr = self.IOEngine.output(redTree)
         return finalStr
-
     
     """
     def save(self, filename):
