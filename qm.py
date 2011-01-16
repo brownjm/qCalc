@@ -1,5 +1,7 @@
 """Quantum mechanical plugin"""
 
+from mathematics import MathType
+
 class QMType(MathType):
     """Base type for all quantum mechanical types"""
     def __init__(self, val):
