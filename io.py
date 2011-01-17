@@ -31,6 +31,9 @@ parseOrder is a list of classes in the order they should be removed from the
 input string
 
 orderOfOperations is a list of the correct mathematical order of operations
+
+containers is a list of instantiated ContainerTypes that should be recognized
+in the input string
 """
         self.inputDict = inputDict
         self.outputDict = outputDict
@@ -101,7 +104,7 @@ replaces 'val' with actual class.val value."""
     def collapseTree(self, tree):
         """Construct an object list on the expression tree"""
         objectList = [tree]
-        typeList = [type(tree)]
+        typeList = [type(tree)] # stores the type of each object in objectList
         while Expression in typeList:
             loc = typeList.index(Expression)
             exp = objectList.pop(loc)
