@@ -117,29 +117,6 @@ replaces 'val' with actual class.val value."""
             typeList = [type(item) for item in objectList] # update typeList
         return objectList
 
-    def findContainer(self, string, container):
-        """Search given string for specified container and return a list of
-occurances and their associated nested depth."""
-        stack = []
-        containerMatches = []
-        for loc, char in enumerate(string):
-            if char == container.openingChar:
-                stack.append(loc) # save location of character
-            elif char == container.closingChar:
-                if stack: # check if not empty, opening character was found
-                    openingCharLoc = stack.pop()
-                    closingCharLoc = loc
-                    depth = len(stack)
-                    span = (openingCharLoc, closingCharLoc+1)
-                    containedString = string[openingCharLoc+1:closingCharLoc]
-                    containerMatches.append(ContainerMatch(depth, span,
-                                                           containedString))
-                else: # no opening character to match closing character
-                    raise ContainerError(string, loc)
-        if len(stack) != 0:
-            raise ContainerError(string, stack.pop())
-        return containerMatches
-
     def split(self, string):
         """Split string into valid string tokens"""
         #######################################################################
@@ -184,6 +161,39 @@ occurances and their associated nested depth."""
         outputString = outputString.replace('||', '|')
         #######################################################################
         return outputString
+
+    def findContainer(self, string, container):
+        """Search given string for specified container and return a list of
+occurances and their associated nested depth."""
+        stack = []
+        containerMatches = []
+        for loc, char in enumerate(string):
+            if char == container.openingChar:
+                stack.append(loc) # save location of character
+            elif char == container.closingChar:
+                if stack: # check if not empty, opening character was found
+                    openingCharLoc = stack.pop()
+                    closingCharLoc = loc
+                    depth = len(stack)
+                    span = (openingCharLoc, closingCharLoc+1)
+                    containedString = string[openingCharLoc+1:closingCharLoc]
+                    containerMatches.append(ContainerMatch(depth, span,
+                                                           containedString))
+                else: # no opening character to match closing character
+                    raise ContainerError(string, loc)
+        if len(stack) != 0: # no closing character to match opening character
+            raise ContainerError(string, stack.pop())
+        return containerMatches
+
+    def preprocessObjList(self, objList):
+        """Search through object list for missing multiplication operations and
+negations."""
+        for loc, obj in enumerate(objList):
+            if obj == mathematics.Operation('-'):
+                pass
+
+            
+        return objList
 
 # Helper classes
 class Expression(object):
@@ -242,9 +252,17 @@ class ContainerError(Exception):
 
 if __name__ == '__main__':
     from mathematics import *
+    # testing parentheses
     p = ContainerType('(', ')')
     test = '1+(2+(3+4))'
     print test
     io = IOEngine(inputDict, outputDict, parseOrder, orderOfOperations,
                   containers)
     con = io.findContainer(test, p)
+
+    #testing negation
+    negate = '-1*-2'
+    tokenList = io.split(negate)
+    objList = []
+    for token in tokenList:
+        objList.append(io.toObject(token))
