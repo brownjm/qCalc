@@ -224,18 +224,18 @@ class ClassificationError(Exception):
     def __init__(self, string):
         self.msg = "Cannot classify {0} from provided dictionary".format(string)
     def __str__(self):
-        return repr(self.msg)
+        return self.msg
 
 class InputError(Exception):
     def __init__(self, string, loc=0):
-        self.msg = "Invalid input: {0}".format(string)
+        self.msg = " "*(loc+2) + "^\nInvalid input: {0}".format(string)
         self.loc = loc
     def __str__(self):
-        return repr(self.msg)
+        return self.msg
 
 class ContainerError(Exception):
     def __init__(self, string, loc=0):
-        self.msg = "Missing matching container symbol: {0}".format(string)
+        self.msg = " "*(loc+2) + "^\nMissing matching symbol: {0}".format(string)
         self.loc = loc
     def __str__(self):
         return self.msg
