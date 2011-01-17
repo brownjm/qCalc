@@ -25,21 +25,23 @@ class CommandLinePrompt(object):
      
 """
         while 1:
-            line = raw_input('> ') # get a line from the prompt
-            self.env.addToHistory(line) #add to history
-            command = line.split(' ')[0]
-            aftercommand = line.split(' ')[1:]
-            args = filter(lambda s: s[0] != '-', aftercommand)
-            flags = filter(lambda s: s[0] == '-', aftercommand)
-            
-            if command in commands:
-                exec 'self.' + command + '(args, flags)'    
-                if command == 'exit':
-                    break
-                    
-            else:
-                print self.env.Eval(line)
-        
+            try:
+                line = raw_input('> ') # get a line from the prompt
+                self.env.addToHistory(line) #add to history
+                command = line.split(' ')[0]
+                aftercommand = line.split(' ')[1:]
+                args = filter(lambda s: s[0] != '-', aftercommand)
+                flags = filter(lambda s: s[0] == '-', aftercommand)
+                
+                if command in commands:
+                    exec 'self.' + command + '(args, flags)'    
+                    if command == 'exit':
+                        break
+                        
+                else:
+                    print self.env.Eval(line)
+            except Exception as ex:
+                print ex
                 
             """
             except iostream.InputError as i:
