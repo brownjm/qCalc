@@ -65,4 +65,5 @@ defaultCommands = {'quit': quit,
 
 if __name__ == '__main__':
     env = Environment()
-    print env.Eval("4+3")
+    ans = env.Eval("4+3*2+8*3")
+    print ans

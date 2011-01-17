@@ -82,7 +82,7 @@ orderOfOperations is a list of the correct mathematical order of operations
 replaces 'val' with actual class.val value."""
         try:
             token = self.outputDict[classToTokenize.__class__] # lookup class
-            return token.replace('val', classToTokenize.val)
+            return token.replace('val', str(classToTokenize.val))
         except KeyError:
             raise ClassificationError(classToTokenize)
 
@@ -105,8 +105,11 @@ replaces 'val' with actual class.val value."""
         while Expression in typeList:
             loc = typeList.index(Expression)
             exp = objectList.pop(loc)
-            objectList.insert(loc, exp.right)
-            objectList.insert(loc, exp.op)
+            if not exp.right == None:
+                objectList.insert(loc, exp.right)
+            if not exp.op == None:
+                objectList.insert(loc, exp.op)
+                
             objectList.insert(loc, exp.left)
             typeList = [type(item) for item in objectList] # update typeList
         return objectList

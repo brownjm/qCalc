@@ -27,7 +27,16 @@ class Number(MathType):
         return (type(self) == type(other)) and (float(self.val) == float(other.val))
     def Value(self):
         return float(self.val)
-
+    def __repr__(self):
+        return str(self.Value())
+    def __add__(self, other):
+        return Number(self.Value() + other.Value())
+    def __sub__(self, other):
+        return Number(self.Value() - other.Value())
+    def __mul__(self, other):
+        return Number(self.Value() * other.Value())
+    def __div__(self, other):
+        return Number(self.Value() / other.Value())
 
 class Operation(MathType):
     """Class for basic mathematical operations, e.g. +, -, *, /"""
