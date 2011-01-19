@@ -2,12 +2,14 @@
 
 Run using:
 
-python QMcalc.py
+python shell.py
 
 
 """
 
 from environment import Environment
+from mathematics import Variable
+from io import Expression
 
 class CommandLinePrompt(object):
     """Current interface to the quantum mechanics calculator."""
@@ -53,6 +55,20 @@ class CommandLinePrompt(object):
     def exit(self, args, flags):
         print 'Goodbye!!'
 
+    def let(self, args, flags):
+        #Currently assuming args like this: ['name', '=', 'val']
+        #account for possibilities of lack of spaces between name, =, and val
+        var = Variable(args[0], args[2])
+        self.env.addVariable(var)
+
+    def get(self, args, flags):
+        if len(args) == 0:
+            raise Exception("A variable name is required.")
+
+        var = self.env.getVariable(args[0])
+        
+        print args[0] + ':', var.Value()
+
     def dummy(self, args, flags):
         print 'args: ', args
         print 'flags: ', flags
@@ -71,7 +87,7 @@ def main(line):
      # display all classes that were identified
 """ 
 
-commands = ["exit", "dummy"]
+commands = ["exit", "let", "get", "dummy"]
 
 if __name__ == '__main__':
     CLP = CommandLinePrompt()
