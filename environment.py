@@ -1,7 +1,8 @@
 """Module containing classes and functions to support a computational
 environment."""
 
-import copy, pickle, mathematics as m
+import copy, pickle
+from plugin import PluginEngine
 from io import IOEngine
 from calc import CalcEngine
 
@@ -10,8 +11,13 @@ class Environment(object):
 items such as variables, current objects in environment, command history, etc.
 """
     def __init__(self):
-        self.IOEngine = IOEngine(m.inputDict, m.outputDict, m.parseOrder,
-                                 m.orderOfOperations, None) #Reference to IO Engine
+        self.PluginEngine = PluginEngine()
+        self.loadedPlugins = self.PluginEngine.loadedPlugins.keys()
+        self.IOEngine = IOEngine(self.PluginEngine.inputDict,
+                                 self.PluginEngine.outputDict,
+                                 self.PluginEngine.parseOrder,
+                                 self.PluginEngine.orderOfOperations,
+                                 self.PluginEngine.containers) #Reference to IO Engine
         self.CalcEngine  = CalcEngine()  #Reference to Calc Engine
         self.history = []   #History of the user's actions
         self.variables = {} #Variables the user can create
