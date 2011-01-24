@@ -16,8 +16,7 @@ class CommandLinePrompt(object):
     def __init__(self):
         self.env = Environment()
 
-    def run(self):
-        """Begin the command line program"""
+    def doWelcome(self):
         print """
 #    Quantum Mechanics Calculator 
 #
@@ -26,32 +25,43 @@ class CommandLinePrompt(object):
 #    Type 'exit' to quit.
      
 """
+
+    def run(self):
+        """Begin the command line program"""
+        self.doWelcome()
+        
         while 1:
             try:
                 line = raw_input('> ') # get a line from the prompt
-                self.env.addToHistory(line) #add to history
-                command = line.split(' ')[0]
-                aftercommand = line.split(' ')[1:]
-                args = filter(lambda s: s[0] != '-', aftercommand)
-                flags = filter(lambda s: s[0] == '-', aftercommand)
-                
-                if command in commands:
-                    exec 'self.' + command + '(args, flags)'    
-                    if command == 'exit':
-                        break
+
+                command = self.execute(line)
+                if command == 'exit':
+                    break
                         
-                else:
-                    print self.env.Eval(line)
             except Exception as ex:
                 print ex
                 
-            """
-            except iostream.InputError as i:
-                print ' '*(i.loc+2) + '^' # displays caret under error
-                print i.msg
-            except classify.ClassificationError as c:
-                print c.msg
-            """
+    def execute(self, line):
+        self.env.addToHistory(line) #add to history
+        command = line.split(' ')[0]
+        aftercommand = line.split(' ')[1:]
+        args = filter(lambda s: s[0] != '-', aftercommand)
+        flags = filter(lambda s: s[0] == '-', aftercommand)
+        if command in commands:
+            exec 'self.' + command + '(args, flags)'    
+        else:
+            print self.env.Eval(line)
+
+        return command
+
+    def historyLength(self):
+        return len(self.env.history)
+
+    def getFromHistory(self, index=-1):
+        return self.env.getFromHistory(index)
+    #
+    #Command Methods
+    #
     def exit(self, args, flags):
         print 'Goodbye!!'
 
@@ -69,25 +79,16 @@ class CommandLinePrompt(object):
         
         print args[0] + ':', var.Value()
 
+    def variables(self, args, flags):
+        #print self.env.variables.keys()
+        for var in self.env.variables.keys():
+            print var + ':', self.env.getVariable(var).Value()
+
     def dummy(self, args, flags):
         print 'args: ', args
         print 'flags: ', flags
 
-"""
-def main(line):
-    c = classify.Classifier(QMTypes.inputDict, QMTypes.outputDict)
-    
-    inputTokenList = iostream.parse(line) # parse input
-    classList = []
-
-    expr=c.toExpr(inputTokenList)
-    res=Evaluator.Evaluate(expr)
-
-    print iostream.assemble(c.toTokenList(res))
-     # display all classes that were identified
-""" 
-
-commands = ["exit", "let", "get", "dummy"]
+commands = ["exit", "let", "get", "variables", "dummy"]
 
 if __name__ == '__main__':
     CLP = CommandLinePrompt()
