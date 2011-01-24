@@ -24,11 +24,14 @@ items such as variables, current objects in environment, command history, etc.
 
     def addToHistory(self, histtoadd):
         """Method to add to the history"""
-        self.history.append(histtoadd)
+        self.history.insert(0, histtoadd)
 
     def getFromHistory(self, index=-1):
         """Method to get from the history"""
-        if(index == -1):
+        if len(self.history) == 0 or index == -1:
+            return ''
+        
+        if index >= len(self.history):
             return self.history[len(self.history) - 1]
 
         return self.history[index]
