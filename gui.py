@@ -39,16 +39,7 @@ class CalcGui(Frame, Executable):
         sys.stdout = self.opWrap
 
         Executable.__init__(self)
-        
-        print """
-#    Quantum Mechanics Calculator 
-#
-#    Copyright (C) 2010  Jeffrey M. Brown, Kyle T. Taylor, Greg A. Cohoon
-#
-#    Type 'exit' to quit.
-     
-"""
-        
+         
         self.prompt = "\n> "
 
         self.histindex = -1

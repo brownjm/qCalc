@@ -11,20 +11,8 @@ from executable import Executable
 
 class CommandLinePrompt(Executable):
     """Current interface to the quantum mechanics calculator."""
-    def doWelcome(self):
-        print """
-#    Quantum Mechanics Calculator 
-#
-#    Copyright (C) 2010  Jeffrey M. Brown, Kyle T. Taylor
-#
-#    Type 'exit' to quit.
-     
-"""
-
     def run(self):
         """Begin the command line program"""
-        self.doWelcome()
-        
         while 1:
             try:
                 line = raw_input('> ') # get a line from the prompt
