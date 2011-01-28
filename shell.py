@@ -15,7 +15,7 @@ class CommandLinePrompt(Executable):
         print """
 #    Quantum Mechanics Calculator 
 #
-#    Copyright (C) 2010  Jeffrey M. Brown, Kyle T. Taylor, Greg A. Cohoon
+#    Copyright (C) 2010  Jeffrey M. Brown, Kyle T. Taylor
 #
 #    Type 'exit' to quit.
      
