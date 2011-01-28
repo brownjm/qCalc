@@ -4,6 +4,7 @@ from mathematics import Variable
 class Executable(object):
     def __init__(self):
         self.env = Environment()
+        self.doWelcome()
 
     def run(self):
         raise Exception("Required to override")
@@ -20,6 +21,16 @@ class Executable(object):
             print self.env.Eval(line)
 
         return command
+
+    def doWelcome(self):
+        print """
+#    Quantum Mechanics Calculator 
+#
+#    Copyright (C) 2010  Jeffrey M. Brown, Kyle T. Taylor
+#
+#    Type 'exit' to quit.
+     
+"""
 
     #
     #Command Methods
