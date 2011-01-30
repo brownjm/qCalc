@@ -1,22 +1,22 @@
-#!/usr/bin/python
-
-#import rpErrorHandler
+from executable import Executable
 from Tkinter import *
-from environment import Environment
-from shell import CommandLinePrompt
-import sys
 
-#------------------------------------------------------------------------------#
-#                                                                              #
-#                                   CalcGui                                    #
-#                                                                              #
-#------------------------------------------------------------------------------#
-class CalcGui(Frame):
+class Launcher(object):
+    def run(self):
+        self.Root = Tk()
+        self.App = CalcGui(self.Root)
+        self.App.pack(expand='yes', fill='both')
+
+        self.Root.title('qCalc')
+        self.Root.protocol("WM_DELETE_WINDOW", closeCallback)
+        self.Root.mainloop()
+
+class CalcGui(Frame, Executable):
     def __init__(self,Master=None,**kw):
         #
         #Setting up the graphical components
         #        
-        apply(Frame.__init__,(self,Master),kw)
+        Frame.__init__(self)
         self.T = Text(self, state='disabled')
         self.s = Scrollbar(self)
         self.I = Entry(self)
@@ -37,32 +37,29 @@ class CalcGui(Frame):
         #
         self.opWrap = OutputWrapper(self)
         sys.stdout = self.opWrap
-        
-        self.shell = CommandLinePrompt()
-        self.shell.doWelcome()
+
+        Executable.__init__(self)
+         
         self.prompt = "\n> "
 
         self.histindex = -1
 
         self.writePrompt()
-        #
-        #Your code here
-        #
     #
     #Start of event handler methods
     #
     def upkey(self, Event=None):
         self.I.delete(0, END)
-        if self.histindex < self.shell.historyLength() - 1:
+        if self.histindex < len(self.env.history) - 1:
             self.histindex += 1
 
-        self.I.insert(INSERT, self.shell.getFromHistory(self.histindex))
+        self.I.insert(INSERT, self.env.history(self.histindex))
 
     def downkey(self, Event=None):
         self.I.delete(0, END)
         if self.histindex > -1:
             self.histindex -= 1
-        self.I.insert(INSERT, self.shell.getFromHistory(self.histindex))
+        self.I.insert(INSERT, self.env.history(self.histindex))
 
     def enterkey(self, Event=None):
         line = self.I.get()
@@ -71,7 +68,7 @@ class CalcGui(Frame):
         print line
 
         try:
-            command = self.shell.execute(line)
+            command = self.execute(line)
             if command == 'exit':
                 closeCallback()
         except Exception as ex:
@@ -99,46 +96,14 @@ class OutputWrapper(object):
 
     def write(self, string):
         self.parent.writeCallback(string)
-    #
-    #Start of non-Rapyd user code
-    #
 
 
-try:
-    #--------------------------------------------------------------------------#
-    # User code should go after this comment so it is inside the "try".        #
-    #     This allows rpErrorHandler to gain control on an error so it         #
-    #     can properly display a Rapyd-aware error message.                    #
-    #--------------------------------------------------------------------------#
+if __name__ == '__main__':
+    def closeCallback():
+        sys.stdout = origstdobj
+        launcher.Root.destroy()
 
-    #Adjust sys.path so we can find other modules of this project
-    import sys
-    if '.' not in sys.path:
-        sys.path.append('.')
-    #Put lines to import other modules of this project here
-    
-    if __name__ == '__main__':
-
-        def closeCallback():
-            sys.stdout = origstdobj
-            Root.destroy()
-
-        origstdobj = sys.stdout
-
-        Root = Tk()
-        import Tkinter
-        #Tkinter.CallWrapper = rpErrorHandler.CallWrapper
-        del Tkinter
-        App = CalcGui(Root)
-        App.pack(expand='yes',fill='both')
-
-        #Root.geometry('640x480+10+10')
-        Root.title('qCalc')
-        Root.protocol("WM_DELETE_WINDOW", closeCallback)
-        Root.mainloop()
-    #--------------------------------------------------------------------------#
-    # User code should go above this comment.                                  #
-    #--------------------------------------------------------------------------#
-except Exception as ex:
-    print ex
-    #rpErrorHandler.RunError()    
+    origstdobj = sys.stdout
+        
+    launcher = Launcher()
+    launcher.run()
