@@ -43,24 +43,31 @@ in the input string
 
     def input(self, string):
         """IOEngine main input method. Contructs a tree from a string"""
-        objectList = []
-        # find containers and parse into trees
-        for container in containers:
-            self.findContainer(string, container)
-        
-        tree = self.buildTree(objectList)
-        
-    def parse(self, string):
-        """Parse string and build an Expression tree"""
-        tokenList = self.split(string)
-        objectList = []
-        for token in tokenList:
-            objectList.append(self.toObject(token))
-        tree = self.buildTree(objectList)
-        return tree
+        strList = []
+        container = self.containers[0]
+        matches = self.findContainer(string, container)
+        if not matches: # no containers found
+            strList.append(string)
+        for match in matches:
+            if match.depth == 0: # first level nesting
+                strList.append(string[0:match.span[0]]) # before container
+                strList.append(string[match.span[0]:match.span[1]]) # container
+                strList.append(string[match.span[1]:]) # after container
+                string = string[match.span[1]:]
+        print strList
 
+        objList = []
+        for string in strList:
+            if string[0] == container.openingChar: # string is container
+                objList.append(mathematics.Quantity(string))
+            else:
+                objList.extend(self.parse(string))
+
+        tree = self.buildTree(objList)
+        return tree
+        
     def output(self, tree):
-        """IOEngine main output method. Outputs string based on Expression tree
+        """IOEngine main output method. Constructs a string from a tree.
 """
         objectList = self.collapseTree(tree)
         tokenList = []
@@ -68,6 +75,14 @@ in the input string
             tokenList.append(self.toToken(Object))
         string = self.assemble(tokenList)
         return string
+
+    def parse(self, string):
+        """Parses string into a list of objects"""
+        tokenList = self.split(string)
+        objectList = []
+        for token in tokenList:
+            objectList.append(self.toObject(token))
+        return objectList
 
     def toObject(self, tokenToClassify):
         """Attempt to match string token to an object in the dictionary."""
@@ -210,6 +225,9 @@ class ContainerMatch(object):
         self.span = span
         self.string = string
 
+    def __str__(self):
+        return "ContainerMatch\ndepth:  {0}\nspan:   {1}\nstring: {2}\n".format(self.depth, self.span, self.string)
+
 
 # Helper functions
 def printTree(tree, level=0):
@@ -254,7 +272,7 @@ if __name__ == '__main__':
     from mathematics import *
     # testing parentheses
     p = ContainerType('(', ')')
-    test = '1+(2+(3+4))'
+    test = '1+(2+2)*(3-4)+10'
     print test
     io = IOEngine(inputDict, outputDict, parseOrder, orderOfOperations,
                   containers)
