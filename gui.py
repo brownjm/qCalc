@@ -53,13 +53,14 @@ class CalcGui(Frame, Executable):
         if self.histindex < len(self.env.history) - 1:
             self.histindex += 1
 
-        self.I.insert(INSERT, self.env.history(self.histindex))
+        self.I.insert(INSERT, self.env.history[self.histindex])
 
     def downkey(self, Event=None):
         self.I.delete(0, END)
         if self.histindex > -1:
             self.histindex -= 1
-        self.I.insert(INSERT, self.env.history(self.histindex))
+        if self.histindex > -1:
+            self.I.insert(INSERT, self.env.history[self.histindex])
 
     def enterkey(self, Event=None):
         line = self.I.get()
