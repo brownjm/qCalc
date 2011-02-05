@@ -46,7 +46,7 @@ items such as variables, current objects in environment, command history, etc.
 
     def Eval(self, inputStr):
         """Method to provide evaluation control to shell"""
-        exprTree = self.IOEngine.parse(inputStr)
+        exprTree = self.IOEngine.input(inputStr)
         redTree = self.CalcEngine.Evaluate(exprTree)
         finalStr = self.IOEngine.output(redTree)
         return finalStr
