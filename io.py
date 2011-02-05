@@ -44,7 +44,7 @@ in the input string
     def input(self, string):
         """IOEngine main input method. Contructs a tree from a string"""
         strList = []
-        container = self.containers[0]
+        container = self.containers[0] # only worry about first container
         matches = self.findContainer(string, container)
         
         while len(matches) > 0:
@@ -53,6 +53,7 @@ in the input string
             strList.append(string[match.span[0]:match.span[1]]) # container
             string = string[match.span[1]:] # string after container
             matches = self.findContainer(string, container)
+
         if len(string) > 0:
             strList.append(string) # append remaining string
 
@@ -202,15 +203,6 @@ occurances and their associated nested depth."""
         containerMatches.sort() # sort containers by depth
         return containerMatches
 
-    def preprocessObjList(self, objList):
-        """Search through object list for missing multiplication operations and
-negations."""
-        for loc, obj in enumerate(objList):
-            if obj == mathematics.Operation('-'):
-                pass
-
-            
-        return objList
 
 # Helper classes
 class Expression(object):
