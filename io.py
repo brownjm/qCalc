@@ -48,10 +48,12 @@ in the input string
         matches = self.findContainer(string, container)
         
         while len(matches) > 0:
-            match = matches[0]
-            strList.append(string[0:match.span[0]]) # before container
-            strList.append(string[match.span[0]:match.span[1]]) # container
-            string = string[match.span[1]:] # string after container
+            match = matches[0] # use first match
+            strBeforeContainer = string[0:match.span[0]]
+            if len(strBeforeContainer) > 0:
+                strList.append(strBeforeContainer)
+            strList.append(string[match.span[0]:match.span[1]])
+            string = string[match.span[1]:]
             matches = self.findContainer(string, container)
 
         if len(string) > 0:
@@ -109,12 +111,22 @@ replaces 'val' with actual class.val value."""
         """Construct a tree based on the object list"""
         for operation in self.order:
             while operation in objectList:
-                loc = objectList.index(operation) - 1
-                left = objectList.pop(loc)
+                loc = objectList.index(operation)
                 op = objectList.pop(loc)
-                right = objectList.pop(loc)
+                left = objectList.pop(loc-1)
+                if isinstance(left, mathematics.Quantity):
+                    left = self.input(left.val)
+                right = objectList.pop(loc-1)
+                if isinstance(right, mathematics.Quantity):
+                    right = self.input(right.val)
                 objectList.insert(loc, Expression(left, op, right))
-        tree = objectList[0]
+
+        if isinstance(objectList[0], mathematics.Quantity):
+            tree = self.input(objectList[0].val)
+        elif isinstance(objectList[0], Expression):
+            tree = objectList[0]
+        else:
+            raise BuildTreeError
         return tree
 
     def collapseTree(self, tree):
@@ -271,7 +283,8 @@ if __name__ == '__main__':
     p = ContainerType('(', ')')
     io = IOEngine(inputDict, outputDict, parseOrder, orderOfOperations,
                   containers)
-    test = '1+(2+3)+4+(5+6+7)+8+(9+(10-2))'
-    print test
+    test = '(1+((9-((2+3)*197)))+1)'
+    print test, '\n'
     con = io.findContainer(test, p)
-    printTree(io.input(test))
+    tree = io.input(test)
+    printTree(tree)
