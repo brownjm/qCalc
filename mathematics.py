@@ -47,7 +47,7 @@ class Operation(MathType):
 class Quantity(MathType):
     """Class to represent mathematical quantities, such as (A+3*B)"""
     def __init__(self, quantity):
-        MathType.__init__(self, quantity)
+        MathType.__init__(self, quantity[1:-1]) # remove ( and )
 
 
 class Variable(MathType):
