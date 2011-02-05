@@ -46,15 +46,15 @@ in the input string
         strList = []
         container = self.containers[0]
         matches = self.findContainer(string, container)
-        if not matches: # no containers found
-            strList.append(string)
-        for match in matches:
-            if match.depth == 0: # first level nesting
-                strList.append(string[0:match.span[0]]) # before container
-                strList.append(string[match.span[0]:match.span[1]]) # container
-                strList.append(string[match.span[1]:]) # after container
-                string = string[match.span[1]:]
-        print strList
+        
+        while len(matches) > 0:
+            match = matches[0]
+            strList.append(string[0:match.span[0]]) # before container
+            strList.append(string[match.span[0]:match.span[1]]) # container
+            string = string[match.span[1]:] # string after container
+            matches = self.findContainer(string, container)
+        if len(string) > 0:
+            strList.append(string) # append remaining string
 
         objList = []
         for string in strList:
@@ -198,6 +198,8 @@ occurances and their associated nested depth."""
                     raise ContainerError(string, loc)
         if len(stack) != 0: # no closing character to match opening character
             raise ContainerError(string, stack.pop())
+
+        containerMatches.sort() # sort containers by depth
         return containerMatches
 
     def preprocessObjList(self, objList):
@@ -227,6 +229,9 @@ class ContainerMatch(object):
 
     def __str__(self):
         return "ContainerMatch\ndepth:  {0}\nspan:   {1}\nstring: {2}\n".format(self.depth, self.span, self.string)
+
+    def __lt__(self, other):
+        return self.depth < other.depth
 
 
 # Helper functions
@@ -272,15 +277,9 @@ if __name__ == '__main__':
     from mathematics import *
     # testing parentheses
     p = ContainerType('(', ')')
-    test = '1+(2+2)*(3-4)+10'
-    print test
     io = IOEngine(inputDict, outputDict, parseOrder, orderOfOperations,
                   containers)
+    test = '1+(2+3)+4+(5+6+7)+8+(9+(10-2))'
+    print test
     con = io.findContainer(test, p)
-
-    #testing negation
-    negate = '-1*-2'
-    tokenList = io.split(negate)
-    objList = []
-    for token in tokenList:
-        objList.append(io.toObject(token))
+    printTree(io.input(test))
