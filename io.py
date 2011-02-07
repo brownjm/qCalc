@@ -208,9 +208,9 @@ occurances and their associated nested depth."""
                     containerMatches.append(ContainerMatch(depth, span,
                                                            containedString))
                 else: # no opening character to match closing character
-                    raise ContainerError(string, loc)
+                    raise ContainerError('(', loc)
         if len(stack) != 0: # no closing character to match opening character
-            raise ContainerError(string, stack.pop())
+            raise ContainerError(')', stack.pop())
 
         containerMatches.sort() # sort containers by depth
         return containerMatches
