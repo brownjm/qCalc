@@ -40,7 +40,7 @@ class CalcGui(Frame, Executable):
 
         Executable.__init__(self)
          
-        self.prompt = "\n> "
+        self.prompt = "\n>"
 
         self.histindex = -1
 
