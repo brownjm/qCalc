@@ -125,8 +125,10 @@ replaces 'val' with actual class.val value."""
             tree = self.input(objectList[0].val)
         elif isinstance(objectList[0], Expression):
             tree = objectList[0]
+        elif isinstance(objectList[0], mathematics.Number):
+            tree = Expression(mathematics.Number(0), mathematics.Operation('+'), objectList[0])
         else:
-            raise BuildTreeError
+            raise BuildTreeError(str(objectList[0]))
         return tree
 
     def collapseTree(self, tree):
@@ -277,13 +279,20 @@ class ContainerError(Exception):
     def __str__(self):
         return self.msg
 
+class BuildTreeError(Exception):
+    def __init__(self, string, loc=0):
+        self.msg = "Error while building expression tree at symbol: {0}".format(string)
+        self.loc = loc
+    def __str__(self):
+        return self.msg
+
 if __name__ == '__main__':
     from mathematics import *
     # testing parentheses
     p = ContainerType('(', ')')
     io = IOEngine(inputDict, outputDict, parseOrder, orderOfOperations,
                   containers)
-    test = '(1+((9-((2+3)*197)))+1)'
+    test = '1+(1+((9-((2+3)*197)))+1)'
     print test, '\n'
     con = io.findContainer(test, p)
     tree = io.input(test)
